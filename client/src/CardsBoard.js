@@ -34,6 +34,10 @@ const CardsBoard = () => {
     const { secondPlayerDeck, setSecondPlayerDeck } = useContext(DeckContext);
     const { setPlayer1Power } = useContext(DeckContext);
     const { setPlayer2Power } = useContext(DeckContext);
+    const [morale1, setMorale1] = useState('');
+    const [morale2, setMorale2] = useState('');
+    const [player1Morale, setPlayer1Morale] = useState({combat: '', ranged: '', siege: ''});
+    const [player2Morale, setPlayer2Morale] = useState({combat: '', ranged: '', siege: ''});
     const [state, dispatch] = useReducer(reducer, {
         player1Cards: [],
         player1Combat: [],
@@ -51,8 +55,7 @@ const CardsBoard = () => {
         for (let i = 0; i < 10; i++) {
             const index = Math.floor(Math.random() * deck.length);
             if (deck[index]) {
-                array.push(deck[index] ? deck.splice(index, 1)[0] : '');
-                
+                array.push(deck[index] ? deck.splice(index, 1)[0] : '');  
             }
         }
         setFirstPlayerDeck(deck);
@@ -72,34 +75,52 @@ const CardsBoard = () => {
         dispatch({type: 'setPlayer2Cards', payload: array});
     }, []);
 
-    const handleClick1 = (item) => {
-        console.log(item.type);
-        if (item.type === 'combat') {
-            dispatch({type: 'setPlayer1Combat', payload: [...state.player1Combat, item]});
-        } else if (item.type === 'ranged') {
-            dispatch({type: 'setPlayer1Ranged', payload: [...state.player1Ranged, item]});
-        } else {
-            dispatch({type: 'setPlayer1Siege', payload: [...state.player1Siege, item]});
-        }
+    const handlePlayer1Cards = (item) => {
         const index = state.player1Cards.findIndex(element => element.name === item.name);
         if (index < 0) return;
         const cards = state.player1Cards.toSpliced(index, 1);
         dispatch({type: 'setPlayer1Cards', payload: cards});
     };
 
-    const handleClick2 = (item) => {
-        if (item.type === 'combat') {
-            dispatch({type: 'setPlayer2Combat', payload: [...state.player2Combat, item]});
-        } else if (item.type === 'ranged') {
-            dispatch({type: 'setPlayer2Ranged', payload: [...state.player2Ranged, item]});
-        } else if (item.type === 'siege') {
-            dispatch({type: 'setPlayer2Siege', payload: [...state.player2Siege, item]});
-        } 
-
+    const handlePlayer2Cards = (item) => {
         const index = state.player2Cards.findIndex(element => element.name === item.name);
         if (index < 0) return;
         const cards = state.player2Cards.toSpliced(index, 1);
         dispatch({type: 'setPlayer2Cards', payload: cards});
+    };
+
+    const handleClick1 = (item) => {
+        if (item.type === 'combat') {
+            dispatch({type: 'setPlayer1Combat', payload: [...state.player1Combat, item]});
+            if (morale1) setMorale1('');
+        } else if (item.type === 'ranged') {
+            dispatch({type: 'setPlayer1Ranged', payload: [...state.player1Ranged, item]});
+            if (morale1) setMorale1('');
+        } else if (item.type === 'siege') {
+            dispatch({type: 'setPlayer1Siege', payload: [...state.player1Siege, item]});
+            if (morale1) setMorale1('');
+        } else if (item.name === 'Commanders Horn') {
+            setMorale1(item);
+            return;
+        }
+        handlePlayer1Cards(item);
+    };
+
+    const handleClick2 = (item) => {
+        if (item.type === 'combat') {
+            dispatch({type: 'setPlayer2Combat', payload: [...state.player2Combat, item]});
+            if (morale2) setMorale2('');
+        } else if (item.type === 'ranged') {
+            dispatch({type: 'setPlayer2Ranged', payload: [...state.player2Ranged, item]});
+            if (morale2) setMorale2('');
+        } else if (item.type === 'siege') {
+            dispatch({type: 'setPlayer2Siege', payload: [...state.player2Siege, item]});
+            if (morale2) setMorale2('');
+        } else if (item.name === 'Commanders Horn') {
+            setMorale2(item);
+            return;
+        }
+        handlePlayer2Cards(item);
     };
 
     useEffect(() => {
@@ -119,12 +140,54 @@ const CardsBoard = () => {
                 handleClick={handleClick2}
                 playerCards={state.player2Cards}
             />
-            <Siege siege={state.player2Siege} />
-            <Ranged ranged={state.player2Ranged} />
-            <Combat combat={state.player2Combat} />
-            <Combat combat={state.player1Combat} />
-            <Ranged ranged={state.player1Ranged} />
-            <Siege siege={state.player1Siege} />
+            <Siege 
+                siege={state.player2Siege}
+                morale={morale2}
+                setMorale={setMorale2}
+                playerMorale={player2Morale}
+                setPlayerMorale={setPlayer2Morale}
+                handlePlayerCards={handlePlayer2Cards} 
+            />
+            <Ranged 
+                ranged={state.player2Ranged} 
+                morale={morale2}
+                setMorale={setMorale2}
+                playerMorale={player2Morale}
+                setPlayerMorale={setPlayer2Morale}
+                handlePlayerCards={handlePlayer2Cards}
+            />
+            <Combat
+                combat={state.player2Combat} 
+                morale={morale2} 
+                setMorale={setMorale2} 
+                playerMorale={player2Morale} 
+                setPlayerMorale={setPlayer2Morale}
+                handlePlayerCards={handlePlayer2Cards} 
+            />
+            <Combat 
+                combat={state.player1Combat} 
+                morale={morale1} 
+                setMorale={setMorale1} 
+                playerMorale={player1Morale} 
+                setPlayerMorale={setPlayer1Morale}
+                handlePlayerCards={handlePlayer1Cards} 
+            />
+            <Ranged 
+                ranged={state.player1Ranged} 
+                morale={morale1}
+                setMorale={setMorale1}
+                playerMorale={player1Morale}
+                setPlayerMorale={setPlayer1Morale}
+                handlePlayerCards={handlePlayer1Cards}
+            />
+            <Siege 
+                siege={state.player1Siege} 
+                morale={morale1}
+                setMorale={setMorale1}
+                playerMorale={player1Morale}
+                setPlayerMorale={setPlayer1Morale}
+                handlePlayerCards={handlePlayer1Cards}    
+            />
             <PlayerCards 
                 handleClick={handleClick1}
                 playerCards={state.player1Cards}
